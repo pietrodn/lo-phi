@@ -1,11 +1,27 @@
-# Challenges in dynamic malware analysis
+# Dynamic Malware Analysis: open challenges
 
-## Environment-aware Malware
+## Dynamic Malware Analysis
+
+Idea: **run the malware** in a sandbox (VM, debugger, ...) and use tools to analyze its behavior.
+
+* We are interested in observing:
+    * CPU instructions
+    * Memory accesses
+    * Network activity
+    * Disk activity
+* Observation tools must be placed **outside** the sandbox.
+* At a **lower level** w.r.t. the malware.
+* In theory, completely *transparent* to the malware.
+* *Not so simple...*
+
+## Artifacts and environment-aware malware
 
 **Observer effect**:
 
 * Execution of software into a debugger or VM leaves *artifacts*
-* Artifacts are evidence of an "artificial" environment
+
+**Artifacts** are evidences of an "artificial" environment.
+
 * They can be reduced or be subtle, but still detectable
 * Malware can detect artifacts and hide its true behavior
 
@@ -19,7 +35,7 @@ If the malware "feels" that it's being analyzed, it could:
 
 ## Artifacts: examples
 
-<! -- TODO: cite [20] -->
+\cite{Chen08} provides a taxonomy of artifacts:
 
 * Hardware
     * Special devices or adapters in VMs
@@ -38,7 +54,7 @@ If the malware "feels" that it's being analyzed, it could:
 
 ## Semantic Gap
 
-Our aim is to **understand what the malware is doing**. Not simple, we need to mine **semantics** from the raw data that we extract.
+Our aim is to **understand what the malware is doing**. Need to mine **semantics** from the extracted raw data.
 
 * From raw data:
     * SATA frame *XYZ*
@@ -59,8 +75,8 @@ Tradeoff between:
 LO-PHI: **Low-Observable Physical Host Instrumentation for Malware Analysis**
 
 * Malware can "feel" the presence of VMs and debuggers.
-    * So we remove them: **inspect actual machine with real hardware**
-    * Physical sensors and actuators
+    * So we remove them: **run malware on bare metal machines**!
+    * Physical sensors and actuators.
 * Bridging the semantic gap
     * Physical sensors collect raw data.
     * Modified open source tool for disk (Sleuthkit) and memory (Volatility) analysis.
@@ -152,7 +168,7 @@ The framework supports:
 The abstracted software interface written in Python is the same.
 We can focus on high-level functionality.
 
-# Artifacts
+# Artifacts: quantitative analysis
 
 ## Memory throughput
 ![Average memory throughput comparison as reported by RAMSpeed, with and without instrumentation. Deviation from uninstrumented trial is only 0.4% in worst case.](images/mem-throughput.pdf)
@@ -165,16 +181,66 @@ We can focus on high-level functionality.
 
 ![There are significant differences for write throughput since here the cache does not help.](images/file-writes.pdf)
 
-# Limitations
-
 # Experiment: evasive malware
 
 # Criticism
 
+## Known limitations
+
+* New chipset use IOMMUs, **disabling DMA** from peripherals.
+    * Current memory acquisition technique will become unusable.
+* **Smearing**: the memory can change *during* the acquisition
+    * Inconsistent states.
+    * Faster polling rates can help.
+* **Filesystem caching**: some data will not pass through SATA interface.
+    * Malware could write a file to disk cache, execute and delete it before the cached is flushed to disk.
+    * However the effects would be visible in memory.
+
+## Limitations of the technique
+
+* The malware is left to run only 3 minutes.
+    * Many malwares need much more time to fully uncover their effects (e.g. ransomware).
+* **No memory polling** during the execution of the malware.
+    * Only snapshot before and after the execution.
+    * Temporary data used by the malware is never seen.
+* Assumption: **malware does not modify BIOS or firmware**.
+    * But if it does, the physical machine could not be recoverable.
+    * Costly!
+* **No Internet access**: the authors always run the malware on disconnected machines.
+    * Most malware becomes useless without Command&Control infrastructure.
+    * Network access could expose further, unseen, artifacts.
+
+## Methodological problems
+
+* The article claims that the artifacts from LO-PHI are unusable by malware because there's **no baseline** (i.e. the malware cannot see the machine before the installation of LO-PHI).
+    * This can also be true for traditional approaches.
+* **No statistical test** used to discover whether difference in disk/memory throughput is statistically significant (presence of artifacts).
+    * Very simple and standard procedure, should really be done in a scientific paper.
+* **Network analysis** technique is not described and unclear.
+    * *We exclude the network trace analysis from much of our discussion since it is a well-known technique and not the focus of our work.*
+
 # Related and future work
 
-## Reftest
+## Related work
 
-Hello [@prova].
+* Many dynamic malware analysis tools rely on virtualization: Ether, BitBlaze, Anubis, V2E, HyperDbg, SPIDER.
+    * We already saw the limitations of VM approaches: **artifacts**.
+* **BareBox** \cite{BareBox11}: malware analysis framework based on a bare-metal machine without virtualization or emulations.
+    * Only targets user-mode malware.
+    * Only disk analysis (no memory tools).
 
 ## References
+
+\begin{thebibliography}{4}
+    \bibitem[Chen, 2008]{Chen08}
+        Chen X., Andersen J, Morley M., Bailey M., Nazario J.
+        \newblock {\em Towards an understanding of anti-virtualization and anti-debugging behavior in modern malware}
+        \newblock In Proceedings of the International Conference on Dependable Systems and Networks (2008)
+        \newblock doi: 10.1109/DSN.2008.4630086
+
+    \bibitem[Kirat, 2011]{BareBox11}
+        Kirat D., Vigna G., Kruegel C.
+        \newblock {\em BareBox: Efficient Malware Analysis on Bare-metal}
+        \newblock Proceedings of the 27th Annual Computer Security Applications Conference (2001)
+        \newblock doi: 10.1145/2076732.2076790
+\end{thebibliography}
