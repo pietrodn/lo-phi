@@ -74,18 +74,24 @@ Our aim is to **understand what the malware is doing**. Need to mine **semantics
 * From raw data:
     * SATA frame *XYZ*
     * TCP packet *ABC*
+    * Some bytes in RAM at `0xDEADBEEF`
 * To concise, high-level event descriptions:
     * A file has been written
     * A connection has been opened
+
+Tools used and modified for live analysis:
+
+* Disk forensics: **Sleuthkit**
+* Memory forensics: **Volatility**
+
+## Malware Analysis Framework Evaluation
+
+![From \cite{BareBox11}](images/evaluation-dimensions.pdf){height=60% width=60%}
 
 Tradeoff between:
 
 1. *Low-artifact, semantically poor* tools (Virtual Machine Introspection)
 1. *High-artifact, semantically-rich* frameworks (debuggers)
-
-## Malware Analysis Framework Evaluation
-
-![From \cite{BareBox11}](images/evaluation-dimensions.pdf){width=100% height=100%}
 
 # LO-PHI: Low-Observable Physical Host Instrumentation for Malware Analysis
 
@@ -96,7 +102,7 @@ Tradeoff between:
     * Physical sensors and actuators.
 * Bridging the **semantic gap**
     * Physical sensors collect raw data.
-    * Modified open source tool for disk (Sleuthkit) and memory (Volatility) analysis.
+    * We need high-level, useful information.
 * **Automated restore** to pre-infection state.
 * **Stealthiness**: very few, undetectable artifacts.
 * **Extendability**: support new OSs and filesystems.
@@ -113,7 +119,11 @@ Assumptions on our model of malware: they are **limitations** of the approach.
     * Malware cannot analyze the system without LO-PHI in place.
     * Harder to compare and detect artifacts: **no baseline**.
 
-## Sensors and actuators
+## Sensors and actuators (1)
+
+![Hardware instrumentation to inspect a bare-metal machine.](images/hardware-setup.pdf){height=95% width=95%}
+
+## Sensors and actuators (2)
 
 ### Sensors
 
@@ -249,6 +259,7 @@ We can focus on high-level functionality.
 
 * The aim should be to do **automated, repeated** analyses.
     * **Disk restore** phase is the lengthiest (> 6 min): should be optimized.
+    * *The resetting and boot process could be decreased significantly by writing a custom PXE loader, or completely mitigated by implementing copy-on-write into our FPGA.*
     * *While snapshots are trivial with virtual machines, it is still an open problem for physical machines.*
 * Analyze transient behavior of binary: continuous memory polling.
     * Need to deal with DMA artifacts.
