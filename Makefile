@@ -10,11 +10,11 @@ SOURCES = slide.md bibliography.tex
 all: $(TARGET)
 
 $(TARGET): $(META) $(SOURCES) $(HEADER)
-	pandoc -H $(HEADER) \
-		-f $(IN_FORMAT) \
-		-t $(OUT_FORMAT) \
-		-s \
-		-o $(TARGET) \
+	pandoc --include-in-header=$(HEADER) \
+		--from=$(IN_FORMAT) \
+		--to=$(OUT_FORMAT) \
+		--standalone \
+		--output=$(TARGET) \
 		$(META) $(SOURCES)
 
 clean:

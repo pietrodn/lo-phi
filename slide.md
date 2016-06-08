@@ -245,6 +245,13 @@ We can focus on high-level functionality.
 * **Network analysis** technique is not described and unclear.
     * *We exclude the network trace analysis from much of our discussion since it is a well-known technique and not the focus of our work.*
 
+## Another point...
+
+* **Virtualization is increasingly used** in production contexts.
+    * Just think about **cloud computing**!
+* Attackers will want to target also VMs.
+* Malware that deactivates in VMs will be less common.
+
 # Related and future work
 
 ## Related work
