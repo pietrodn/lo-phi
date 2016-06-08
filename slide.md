@@ -1,3 +1,9 @@
+## The paper
+
+![](images/title.pdf)\  
+
+NDSS '16, 21-24 February 2016, San Diego, CA, USA
+
 # Dynamic Malware Analysis: open challenges
 
 ## Dynamic Malware Analysis
@@ -14,16 +20,26 @@ Idea: **run the malware** in a sandbox (VM, debugger, ...) and use tools to anal
 * In theory, completely *transparent* to the malware.
 * *Not so simple...*
 
+## Virtualization is like dreaming
+
+* Unsure if you're living in a dream, or awake?
+    * Look for **artifacts** (i.e. anomalies) in your reality.
+
+**Malware does the same**. They can tell whether they are being run in a VM by looking for *artifacts* in their environment.
+
+![A possible artifact in the *Inception* movie.](images/inception.png){width=70%}
+
 ## Artifacts and environment-aware malware
 
 **Observer effect**:
 
-* Execution of software into a debugger or VM leaves *artifacts*
+* Execution of software into a debugger or VM leaves *artifacts*.
 
 **Artifacts** are evidences of an "artificial" environment.
 
-* They can be reduced or be subtle, but still detectable
-* Malware can detect artifacts and hide its true behavior
+* They can be reduced or be subtle, but still detectable.
+* According to \cite{Garfinkel07}, *building a transparent VMM is fundamentally infeasible*.
+* Malware can detect artifacts and hide its true behavior.
 
 **Malware can resist to traditional dynamic analysis tools.** \vspace{1em}
 
@@ -35,22 +51,21 @@ If the malware "feels" that it's being analyzed, it could:
 
 ## Artifacts: examples
 
-\cite{Chen08} provides a taxonomy of artifacts:
+\cite{Chen08}, \cite{Garfinkel07} provide a taxonomy of artifacts:
 
-* Hardware
+* **Hardware**
     * Special devices or adapters in VMs
     * Specific manufacturer prefixes on device names
     * Drivers and adapters for host-guest communication
-    * Bugs in CPU implementation by VMs
-* Memory
+* **Memory**
     * Hypervisors placing interrupt table in different position
     * Too little RAM (typical of VMs)
-* Software
+* **Software**
     * Presence of installed tools on the system
     * Suspicious registry keys
     * `isDebuggerPresent()` Windows API
-* Behaviour
-    * Timing differences
+* **Behaviour**
+    * Timing differences (e.g. interception of privileged instructions in VMMs)
 
 ## Semantic Gap
 
@@ -68,20 +83,23 @@ Tradeoff between:
 1. *Low-artifact, semantically poor* tools (Virtual Machine Introspection)
 1. *High-artifact, semantically-rich* frameworks (debuggers)
 
-# LO-PHI
+## Malware Analysis Framework Evaluation
 
-## The idea
+![From \cite{BareBox11}](images/evaluation-dimensions.pdf){width=100% height=100%}
 
-LO-PHI: **Low-Observable Physical Host Instrumentation for Malware Analysis**
+# LO-PHI: Low-Observable Physical Host Instrumentation for Malware Analysis
 
-* Malware can "feel" the presence of VMs and debuggers.
-    * So we remove them: **run malware on bare metal machines**!
+## Goals
+
+* **No virtualization**: run malware on bare metal machines!
+    * Malware can "feel" the presence of VMs and debuggers.
     * Physical sensors and actuators.
-* Bridging the semantic gap
+* Bridging the **semantic gap**
     * Physical sensors collect raw data.
     * Modified open source tool for disk (Sleuthkit) and memory (Volatility) analysis.
-* Extensible to new OSs and filesystem as long as hardware tapping is feasible.
-* Also works with Virtual Machines.
+* **Automated restore** to pre-infection state.
+* **Stealthiness**: very few, undetectable artifacts.
+* **Extendability**: support new OSs and filesystems.
 
 ## Threat model
 
@@ -92,12 +110,12 @@ Assumptions on our model of malware: they are **limitations** of the approach.
 * No infection delivered to hardware
 * Malware not actively trying to thwart semantic-gap reconstruction
 * Instrumentation is in place before malware is executed
-    * Malware cannot analyze the system without LO-PHI in place
-    * Harder to compare and detect artifacts
+    * Malware cannot analyze the system without LO-PHI in place.
+    * Harder to compare and detect artifacts: **no baseline**.
 
-## Sensors
+## Sensors and actuators
 
-**Sensor**: any data collection component.
+### Sensors
 
 * **Memory**. Xilinx ML507 board connected to PCIe, reads and writes arbitrary memory locations via DMA.
 * **Disk**. ML507 board intercepting all the traffic over SATA interface. Sends SATA frames via Gigabit Ethernet and UDP.
@@ -105,14 +123,9 @@ Assumptions on our model of malware: they are **limitations** of the approach.
     * except when SATA data rate exceeds Ethernet bandwidth: throttling of frames.
 * **Network interface**. Mentioned in paper, but the technology used is unclear.
 
-## Actuators
+### Actuators
 
-**Actuator**: any component which provides inputs for the system.
-
-Arduino Leonardo used to emulate:
-
-* USB keyboard
-* USB mouse
+An Arduino Leonardo emulates **USB keyboard and mouse**.
 
 ## Infrastructure
 
@@ -183,7 +196,10 @@ We can focus on high-level functionality.
 
 # Experiment: evasive malware
 
-# Criticism
+## Timing
+![Time spent in each step of binary analysis. Both environments were booting a 10 GB Windows 7 (64-bit) hibernate image and were running on a system with 1 GB of volatile memory.](images/times.pdf){width=80% height=80%}
+
+# Critique
 
 ## Known limitations
 
@@ -210,7 +226,7 @@ We can focus on high-level functionality.
     * Most malware becomes useless without Command&Control infrastructure.
     * Network access could expose further, unseen, artifacts.
 
-## Methodological problems
+## Methodological issues
 
 * The article claims that the artifacts from LO-PHI are unusable by malware because there's **no baseline** (i.e. the malware cannot see the machine before the installation of LO-PHI).
     * This can also be true for traditional approaches.
@@ -229,18 +245,14 @@ We can focus on high-level functionality.
     * Only targets user-mode malware.
     * Only disk analysis (no memory tools).
 
+## Future evolutions
+
+* The aim should be to do **automated, repeated** analyses.
+    * **Disk restore** phase is the lengthiest (> 6 min): should be optimized.
+    * *While snapshots are trivial with virtual machines, it is still an open problem for physical machines.*
+* Analyze transient behavior of binary: continuous memory polling.
+    * Need to deal with DMA artifacts.
+* Complete hardware coverage
+    * Also analyze malware that infects BIOS and hardware.
+
 ## References
-
-\begin{thebibliography}{4}
-    \bibitem[Chen, 2008]{Chen08}
-        Chen X., Andersen J, Morley M., Bailey M., Nazario J.
-        \newblock {\em Towards an understanding of anti-virtualization and anti-debugging behavior in modern malware}
-        \newblock In Proceedings of the International Conference on Dependable Systems and Networks (2008)
-        \newblock doi: 10.1109/DSN.2008.4630086
-
-    \bibitem[Kirat, 2011]{BareBox11}
-        Kirat D., Vigna G., Kruegel C.
-        \newblock {\em BareBox: Efficient Malware Analysis on Bare-metal}
-        \newblock Proceedings of the 27th Annual Computer Security Applications Conference (2001)
-        \newblock doi: 10.1145/2076732.2076790
-\end{thebibliography}
