@@ -2,9 +2,11 @@
 
 ![](images/title.pdf)\  
 
-NDSS '16, 21-24 February 2016, San Diego, CA, USA
+Network and Distributed System Symposium (NDSS) '16
 
-# Dynamic Malware Analysis: open challenges
+21-24 February 2016, San Diego, CA, USA
+
+# Open challenges in Dynamic Malware Analysis
 
 ## Dynamic Malware Analysis
 
@@ -27,7 +29,7 @@ Idea: **run the malware** in a sandbox (VM, debugger, ...) and use tools to anal
 
 **Malware does the same**. They can tell whether they are being run in a VM by looking for *artifacts* in their environment.
 
-![A possible artifact in the *Inception* movie.](images/inception.png){width=70%}
+![Never stopping spinning top: a possible artifact in dreams.](images/inception.png){width=70%}
 
 ## Artifacts and environment-aware malware
 
@@ -37,7 +39,6 @@ Idea: **run the malware** in a sandbox (VM, debugger, ...) and use tools to anal
 
 **Artifacts** are evidences of an "artificial" environment.
 
-* They can be reduced or be subtle, but still detectable.
 * According to \cite{Garfinkel07}, *building a transparent VMM is fundamentally infeasible*.
 * Malware can detect artifacts and hide its true behavior.
 
@@ -74,12 +75,12 @@ Our aim is to **understand what the malware is doing**. Need to mine **semantics
 * From raw data:
     * SATA frame *XYZ*
     * TCP packet *ABC*
-    * Some bytes in RAM at `0xDEADBEEF`
+    * Some string at memory address `0xDEADBEEF`
 * To concise, high-level event descriptions:
-    * A file has been written
-    * A connection has been opened
+    * `/etc/passwd` has been read
+    * A connection to `badguy.com` has been opened
 
-Tools used and modified for live analysis:
+Tools employed and modified for live analysis:
 
 * Disk forensics: **Sleuthkit**
 * Memory forensics: **Volatility**
@@ -98,11 +99,9 @@ Tradeoff between:
 ## Goals
 
 * **No virtualization**: run malware on bare metal machines!
-    * Malware can "feel" the presence of VMs and debuggers.
     * Physical sensors and actuators.
 * Bridging the **semantic gap**
     * Physical sensors collect raw data.
-    * We need high-level, useful information.
 * **Automated restore** to pre-infection state.
 * **Stealthiness**: very few, undetectable artifacts.
 * **Extendability**: support new OSs and filesystems.
@@ -111,10 +110,8 @@ Tradeoff between:
 
 Assumptions on our model of malware: they are **limitations** of the approach.
 
-* Malware can interact with the system in any way
 * Malicious modifications evident either in memory or on disk
 * No infection delivered to hardware
-* Malware not actively trying to thwart semantic-gap reconstruction
 * Instrumentation is in place before malware is executed
     * Malware cannot analyze the system without LO-PHI in place.
     * Harder to compare and detect artifacts: **no baseline**.
@@ -149,49 +146,17 @@ An Arduino Leonardo emulates **USB keyboard and mouse**.
 
 ### Scalable infrastructure
 
-* Job submission system: jobs are sent to a scheduler
+* Job submission system: jobs are sent to a **scheduler**
 * The scheduler executes the routine on an appropriate machine
+* **Python interface** to control the machine and run malware and analysis
 
-## Common interface (1)
+## Bridging the semantic gap via forensic analysis
 
-Python script for running a malware sample and collecting the appropriate raw data for analysis.
+![Binary analysis workflow. Rounded nodes represent data and rectangles represent data manipulation.](images/semantic-gap.pdf)
 
-\hbeginenvir{scriptsize}
-``` {.python .numberLines}
-disk_tap.start()
-# Send key presses to download binary
-machine.keypress_send(ftp_script)
-# Dump memory (clean)
-machine.memory_dump(memory_file_clean)
-network_tap.start()
-# Get a list of current visible buttons
-button_clicker.update_buttons()
-# Start our binary and click any buttons
-machine.keypress_send('SPECIAL:RETURN')
-# Move our mouse to imitate a human
-machine.mouse_wiggle(True)
-time.sleep(MALWARE_START_TIME)
-# ...
-# Click any new buttons that appeared
-button_clicker.click_buttons(new only=True)
-time.sleep(MALWARE EXECUTION TIME-elapsed_time)
-machine.screenshot(screenshot_two)
-machine.memory dump(memory_file_dirty)
-machine.power_shutdown()
-```
-\hendenvir{scriptsize}
+* Non-malicious software was also run to identify and extract "background noise".
 
-## Common interface (2)
-
-The framework supports:
-
-* Real, physical machines
-* Traditional Virtual-Machine Introspection
-
-The abstracted software interface written in Python is the same.
-We can focus on high-level functionality.
-
-# Artifacts: quantitative analysis
+# Artifacts in LO-PHI: a quantitative analysis
 
 ## Memory throughput
 ![Average memory throughput comparison as reported by RAMSpeed, with and without instrumentation. Deviation from uninstrumented trial is only 0.4% in worst case.](images/mem-throughput.pdf)
@@ -204,7 +169,16 @@ We can focus on high-level functionality.
 
 ![There are significant differences for write throughput since here the cache does not help.](images/file-writes.pdf)
 
-# Experiment: evasive malware
+# Experiments
+
+## Experiment on evasive malware
+
+Malware previously labeled as "evasive" was executed on Windows 7 and analyzed using LO-PHI.
+
+* Many samples clearly exhibited **typical malware behavior**.
+* Some samples failed because of no network connection, or wrong Windows version.
+
+> [...] we feel that our findings are more that sufficient to showcase LO-PHI’s ability to analyze evasive malware, without being subverted, and subsequently produce high-fidelity results for further analysis.
 
 ## Timing
 ![Time spent in each step of binary analysis. Both environments were booting a 10 GB Windows 7 (64-bit) hibernate image and were running on a system with 1 GB of volatile memory.](images/times.pdf){width=80% height=80%}
