@@ -1,10 +1,12 @@
-## The paper
+## The paper and the code
 
 ![](images/title.pdf)\  
 
 Network and Distributed System Symposium (NDSS) '16
 
 21-24 February 2016, San Diego, CA, USA
+
+* GitHub repository: [https://github.com/mit-ll/LO-PHI](https://github.com/mit-ll/LO-PHI)
 
 # Open challenges in Dynamic Malware Analysis
 
@@ -93,7 +95,7 @@ Tradeoff between:
 1. *Low-artifact, semantically poor* tools (Virtual Machine Introspection)
 1. *High-artifact, semantically-rich* frameworks (debuggers)
 
-# LO-PHI: Low-Observable Physical Host Instrumentation for Malware Analysis
+# LO-PHI framework implementation
 
 ## Goals
 
@@ -152,7 +154,7 @@ An Arduino Leonardo emulates **USB keyboard and mouse**.
 
 ![Binary analysis workflow. Rounded nodes represent data and rectangles represent data manipulation.](images/semantic-gap.pdf)
 
-* Non-malicious software was also run to identify and extract "background noise"
+* **Background noise** was removed by analyzing non-malicious software.
 
 ## Example of output of the analysis toolbox
 
@@ -212,7 +214,7 @@ Malware previously labeled as "evasive" was executed on Windows 7 and analyzed u
 * **Network analysis** technique is not described and unclear.
     * *We exclude the network trace analysis from much of our discussion since it is a well-known technique and not the focus of our work.*
 
-## Memory throughput
+## Memory throughput with and without LO-PHI
 ![Average memory throughput comparison as reported by RAMSpeed, with and without instrumentation. Deviation from uninstrumented trial is only 0.4% in worst case. **No statistical test used.**](images/mem-throughput.pdf)
 
 ## Another point...

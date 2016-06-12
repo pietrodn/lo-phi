@@ -8,3 +8,7 @@ You can download the slides here: **[[PDF]](https://github.com/pietrodn/lo-phi/b
 
 These slides are written in Markdown and compiled to LaTeX (and PDF) using [Pandoc](http://pandoc.org).
 The build procedure is in the Makefile.
+
+## References
+
+* [LO-PHI on GitHub](https://github.com/mit-ll/LO-PHI)
