@@ -16,15 +16,15 @@ Idea: **run the malware** in a sandbox (VM, debugger, ...) and use tools to anal
     * Memory accesses
     * Network activity
     * Disk activity
-* Observation tools must be placed **outside** the sandbox.
-* At a **lower level** w.r.t. the malware.
-* In theory, completely *transparent* to the malware.
+* Observation tools must be placed **outside** the sandbox
+* At a **lower level** w.r.t. the malware
+* In theory, completely *transparent* to the malware
 * *Not so simple...*
 
 ## Virtualization is like dreaming
 
 * Unsure if you're living in a dream, or awake?
-    * Look for **artifacts** (i.e. anomalies) in your reality.
+    * Look for **artifacts** (i.e. anomalies) in your reality!
 
 **Malware can do the same...**
 
@@ -36,7 +36,7 @@ Idea: **run the malware** in a sandbox (VM, debugger, ...) and use tools to anal
 
 Execution of software into a debugger or VM leaves **artifacts**.
 
-* Artifacts are evidences of an "artificial" environment.
+* Artifacts are evidences of an "artificial" environment
 * According to \cite{Garfinkel07}, *building a transparent VMM is fundamentally infeasible*.
 
 ### Malware resistance to dynamic analysis
@@ -65,7 +65,9 @@ If the malware is able to detect artifacts, it **can resist to traditional dynam
 
 ## Semantic Gap
 
-Our aim is to **understand what the malware is doing**. Need to mine **semantics** from the extracted raw data.
+### What is the malware doing?
+
+Need to mine **semantics** from the extracted raw data.
 
 * From raw data:
     * Disk read at sector *123*
@@ -74,6 +76,8 @@ Our aim is to **understand what the malware is doing**. Need to mine **semantics
 * To concise, high-level event descriptions:
     * `/etc/passwd` has been read
     * A connection to `badguy.com` has been opened
+
+### Forensics to the rescue
 
 LO-PHI uses well-known **forensic tools**, adapted for live analysis:
 
@@ -94,22 +98,22 @@ Tradeoff between:
 ## Goals
 
 * **No virtualization**: run malware on bare metal machines!
-    * Physical sensors and actuators.
+    * Physical sensors and actuators
 * Bridging the **semantic gap**
-    * Physical sensors collect raw data.
-* **Automated restore** to pre-infection state.
-* **Stealthiness**: very few, undetectable artifacts.
-* **Extendability**: support new OSs and filesystems.
+    * Physical sensors collect raw data
+* **Automated restore** to pre-infection state
+* **Stealthiness**: very few, undetectable artifacts
+* **Extendability**: support new OSs and filesystems
 
 ## Threat model
 
 Assumptions on our model of malware: they are **limitations** of the approach.
 
-* Malicious modifications evident either in memory or on disk
-* No infection delivered to hardware
-* Instrumentation is in place before malware is executed
-    * Malware cannot analyze the system without LO-PHI in place.
-    * Harder to compare and detect artifacts: **no baseline**.
+1. Malicious modifications evident either in memory or on disk
+1. No infection delivered to hardware
+1. Instrumentation is in place before malware is executed
+    * Malware cannot analyze the system without LO-PHI in place
+    * Harder to compare and detect artifacts: **no baseline**
 
 ## Sensors and actuators (1)
 
@@ -133,11 +137,10 @@ An Arduino Leonardo emulates **USB keyboard and mouse**.
 
 ### Restoring physical machines
 
-* We cannot simply "restore a snapshot" like in VMs.
+* We cannot simply "restore a snapshot" like in VMs
 * **Preboot Execute Environment** (PXE) with **CloneZilla**
     * Allows to restore the disk to a previously saved state
     * No interaction with the OS
-* Also, DNS and DHCP servers.
 
 ### Scalable infrastructure
 
@@ -149,7 +152,7 @@ An Arduino Leonardo emulates **USB keyboard and mouse**.
 
 ![Binary analysis workflow. Rounded nodes represent data and rectangles represent data manipulation.](images/semantic-gap.pdf)
 
-* Non-malicious software was also run to identify and extract "background noise".
+* Non-malicious software was also run to identify and extract "background noise"
 
 ## Example of output of the analysis toolbox
 
@@ -177,22 +180,22 @@ Malware previously labeled as "evasive" was executed on Windows 7 and analyzed u
 
 ## Known limitations
 
-* Newer chipsets use IOMMUs, **disabling DMA** from peripherals.
-    * Current memory acquisition technique will become unusable.
+* Newer chipsets use IOMMUs, **disabling DMA** from peripherals
+    * Current memory acquisition technique will become unusable
 * **Smearing**: the memory can change *during* the acquisition
-    * Inconsistent states.
-    * Faster polling rates can help.
-* **Filesystem caching**: some data will not pass through SATA interface.
+    * Inconsistent states
+    * Faster polling rates can help
+* **Filesystem caching**: some data will not pass through SATA interface
     * Malware could write a file to disk cache, execute and delete it before the cached is flushed to disk.
-    * However the effects would be visible in memory.
+    * However, the effects would be visible in memory.
 
 ## Issues with the technique and the experiments
 
 * The malware is left to run only 3 minutes.
     * Many malwares need much more time to fully uncover their effects (e.g. ransomware).
-* **No memory polling** during the execution of the malware.
-    * Only snapshot before and after the execution.
-    * Temporary data used by the malware is never seen.
+* **No memory polling** during the execution of the malware
+    * Only snapshot before and after the execution
+    * Temporary data used by the malware is never seen
 * Assumption: **malware does not modify BIOS or firmware**.
     * But if it does, the physical machine could not be recoverable.
     * Costly!
@@ -216,8 +219,8 @@ Malware previously labeled as "evasive" was executed on Windows 7 and analyzed u
 
 * **Virtualization is increasingly used** in production contexts.
     * Just think about **cloud computing**!
-* Attackers will want to target those VMs \cite{Garfinkel07}.
-* Malware that deactivates in VMs will be less common.
+* Attackers will want to target those VMs \cite{Garfinkel07}
+* Malware that deactivates in VMs will be less common
 
 # Related and future work
 
@@ -226,20 +229,20 @@ Malware previously labeled as "evasive" was executed on Windows 7 and analyzed u
 ### Traditional dynamic analysis
 Many dynamic malware analysis tools rely on virtualization: Ether, BitBlaze, Anubis, V2E, HyperDbg, SPIDER.
 
-* We already saw the limitations of VM approaches: **artifacts**.
+* We already saw the limitations of VM approaches: **artifacts**
 
 ### Bare-metal dynamic analysis
 
 **BareBox** \cite{BareBox11}: malware analysis framework based on a bare-metal machine without virtualization or emulations
 
-* Only targets user-mode malware.
-* Only disk analysis (no memory tools).
+* Only targets user-mode malware
+* Only disk analysis (no memory tools)
 
 ## Future evolutions
 
 ### Automated, repeated analyses
 
-* **Disk restore** phase is the lengthiest (> 6 min): should be optimized.
+* **Disk restore** phase is the lengthiest (> 6 min)
 * *The resetting and boot process could be decreased significantly by writing a custom PXE loader, or completely mitigated by implementing copy-on-write into our FPGA.*
 * *While snapshots are trivial with virtual machines, it is still an open problem for physical machines.*
 
@@ -248,6 +251,6 @@ Many dynamic malware analysis tools rely on virtualization: Ether, BitBlaze, Anu
 * Analyze **transient behavior** of binary
     * Continuous memory polling
     * Need to deal with DMA artifacts
-* Cover **malware that infects hardware** (BIOS, firmware).
+* Cover **malware that infects hardware** (BIOS, firmware)
 
 ## References
