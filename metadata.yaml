@@ -5,7 +5,7 @@
     subtitle: "Chad Spensky, Hongyi Hu and Kevin Leach"
     institute: "Politecnico di Milano"
     toc: true
-    navigation: "horizontal"
+    theme: default
     lang: "en"
     reference-section-title: "References"
 ---

@@ -13,7 +13,6 @@ Network and Distributed System Symposium (NDSS) '16
 Idea: **run the malware** in a sandbox (VM, debugger, ...) and use tools to analyze its behavior.
 
 * We are interested in observing:
-    * CPU instructions
     * Memory accesses
     * Network activity
     * Disk activity
@@ -27,45 +26,41 @@ Idea: **run the malware** in a sandbox (VM, debugger, ...) and use tools to anal
 * Unsure if you're living in a dream, or awake?
     * Look for **artifacts** (i.e. anomalies) in your reality.
 
-**Malware does the same**. They can tell whether they are being run in a VM by looking for *artifacts* in their environment.
+**Malware can do the same...**
 
 ![Never stopping spinning top: a possible artifact in dreams.](images/inception.png){width=70%}
 
 ## Artifacts and environment-aware malware
 
-**Observer effect**:
+### Observer effect
 
-* Execution of software into a debugger or VM leaves *artifacts*.
+Execution of software into a debugger or VM leaves **artifacts**.
 
-**Artifacts** are evidences of an "artificial" environment.
-
+* Artifacts are evidences of an "artificial" environment.
 * According to \cite{Garfinkel07}, *building a transparent VMM is fundamentally infeasible*.
-* Malware can detect artifacts and hide its true behavior.
 
-**Malware can resist to traditional dynamic analysis tools.** \vspace{1em}
+### Malware resistance to dynamic analysis
 
-If the malware "feels" that it's being analyzed, it could:
+If the malware is able to detect artifacts, it **can resist to traditional dynamic analysis tools.**
 
 1. Remain inactive (not trigger the payload)
 1. Abort or crash its host
 1. Disable defenses or tools
 
-## Artifacts: examples
+## Artifacts: some examples
 
 \cite{Chen08}, \cite{Garfinkel07} provide a taxonomy of artifacts:
 
 * **Hardware**
     * Special devices or adapters in VMs
     * Specific manufacturer prefixes on device names
-    * Drivers and adapters for host-guest communication
 * **Memory**
-    * Hypervisors placing interrupt table in different position
+    * Hypervisors placing interrupt table in different positions
     * Too little RAM (typical of VMs)
 * **Software**
     * Presence of installed tools on the system
-    * Suspicious registry keys
     * `isDebuggerPresent()` Windows API
-* **Behaviour**
+* **Behavior**
     * Timing differences (e.g. interception of privileged instructions in VMMs)
 
 ## Semantic Gap
@@ -73,14 +68,14 @@ If the malware "feels" that it's being analyzed, it could:
 Our aim is to **understand what the malware is doing**. Need to mine **semantics** from the extracted raw data.
 
 * From raw data:
-    * SATA frame *XYZ*
+    * Disk read at sector *123*
     * TCP packet *ABC*
-    * Some string at memory address `0xDEADBEEF`
+    * Some bytes at memory address `0xDEADBEEF`
 * To concise, high-level event descriptions:
     * `/etc/passwd` has been read
     * A connection to `badguy.com` has been opened
 
-Tools employed and modified for live analysis:
+LO-PHI uses well-known **forensic tools**, adapted for live analysis:
 
 * Disk forensics: **Sleuthkit**
 * Memory forensics: **Volatility**
@@ -156,18 +151,13 @@ An Arduino Leonardo emulates **USB keyboard and mouse**.
 
 * Non-malicious software was also run to identify and extract "background noise".
 
-# Artifacts in LO-PHI: a quantitative analysis
+## Example of output of the analysis toolbox
 
-## Memory throughput
-![Average memory throughput comparison as reported by RAMSpeed, with and without instrumentation. Deviation from uninstrumented trial is only 0.4% in worst case.](images/mem-throughput.pdf)
+![New processes.](images/output-processes.pdf)
 
-## Disk throughput: reads
+![New sockets.](images/output-sockets.pdf)
 
-![File system read throughput comparison as reported by IOZone on Windows XP, with and without instrumentation on a physical machine.](images/file-reads.pdf)
-
-## Disk throughput: writes
-
-![There are significant differences for write throughput since here the cache does not help.](images/file-writes.pdf)
+![Disk event log.](images/output-disk.pdf)
 
 # Experiments
 
@@ -187,7 +177,7 @@ Malware previously labeled as "evasive" was executed on Windows 7 and analyzed u
 
 ## Known limitations
 
-* New chipset use IOMMUs, **disabling DMA** from peripherals.
+* Newer chipsets use IOMMUs, **disabling DMA** from peripherals.
     * Current memory acquisition technique will become unusable.
 * **Smearing**: the memory can change *during* the acquisition
     * Inconsistent states.
@@ -196,7 +186,7 @@ Malware previously labeled as "evasive" was executed on Windows 7 and analyzed u
     * Malware could write a file to disk cache, execute and delete it before the cached is flushed to disk.
     * However the effects would be visible in memory.
 
-## Limitations of the technique
+## Issues with the technique and the experiments
 
 * The malware is left to run only 3 minutes.
     * Many malwares need much more time to fully uncover their effects (e.g. ransomware).
@@ -219,32 +209,45 @@ Malware previously labeled as "evasive" was executed on Windows 7 and analyzed u
 * **Network analysis** technique is not described and unclear.
     * *We exclude the network trace analysis from much of our discussion since it is a well-known technique and not the focus of our work.*
 
+## Memory throughput
+![Average memory throughput comparison as reported by RAMSpeed, with and without instrumentation. Deviation from uninstrumented trial is only 0.4% in worst case. **No statistical test used.**](images/mem-throughput.pdf)
+
 ## Another point...
 
 * **Virtualization is increasingly used** in production contexts.
     * Just think about **cloud computing**!
-* Attackers will want to target also VMs.
+* Attackers will want to target those VMs \cite{Garfinkel07}.
 * Malware that deactivates in VMs will be less common.
 
 # Related and future work
 
 ## Related work
 
-* Many dynamic malware analysis tools rely on virtualization: Ether, BitBlaze, Anubis, V2E, HyperDbg, SPIDER.
-    * We already saw the limitations of VM approaches: **artifacts**.
-* **BareBox** \cite{BareBox11}: malware analysis framework based on a bare-metal machine without virtualization or emulations.
-    * Only targets user-mode malware.
-    * Only disk analysis (no memory tools).
+### Traditional dynamic analysis
+Many dynamic malware analysis tools rely on virtualization: Ether, BitBlaze, Anubis, V2E, HyperDbg, SPIDER.
+
+* We already saw the limitations of VM approaches: **artifacts**.
+
+### Bare-metal dynamic analysis
+
+**BareBox** \cite{BareBox11}: malware analysis framework based on a bare-metal machine without virtualization or emulations
+
+* Only targets user-mode malware.
+* Only disk analysis (no memory tools).
 
 ## Future evolutions
 
-* The aim should be to do **automated, repeated** analyses.
-    * **Disk restore** phase is the lengthiest (> 6 min): should be optimized.
-    * *The resetting and boot process could be decreased significantly by writing a custom PXE loader, or completely mitigated by implementing copy-on-write into our FPGA.*
-    * *While snapshots are trivial with virtual machines, it is still an open problem for physical machines.*
-* Analyze transient behavior of binary: continuous memory polling.
-    * Need to deal with DMA artifacts.
-* Complete hardware coverage
-    * Also analyze malware that infects BIOS and hardware.
+### Automated, repeated analyses
+
+* **Disk restore** phase is the lengthiest (> 6 min): should be optimized.
+* *The resetting and boot process could be decreased significantly by writing a custom PXE loader, or completely mitigated by implementing copy-on-write into our FPGA.*
+* *While snapshots are trivial with virtual machines, it is still an open problem for physical machines.*
+
+### Extensions
+
+* Analyze **transient behavior** of binary
+    * Continuous memory polling
+    * Need to deal with DMA artifacts
+* Cover **malware that infects hardware** (BIOS, firmware).
 
 ## References
